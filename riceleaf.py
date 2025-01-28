@@ -64,3 +64,53 @@ model.add(Activation('softmax'))  # output layers
 
 
 model.summary()
+
+model.compile(optimizer = RMSprop(),
+             #loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              loss = 'sparse_categorical_crossentropy',
+             metrics = ['accuracy'])
+
+
+
+
+train_datagen = ImageDataGenerator(rescale = 1/255, rotation_range = 40,
+                               width_shift_range = 0.2, height_shift_range = 0.2,
+                               shear_range = 0.2, zoom_range = 0.2,
+                               horizontal_flip = True, fill_mode = 'nearest')
+
+val_datagen = ImageDataGenerator(rescale = 1/255)
+
+BS = 10
+IS = (64,64)
+
+train_gen = tf.keras.utils.image_dataset_from_directory(data_dir, validation_split=0.2,
+                                                        subset="training", seed=100, image_size = IS, batch_size = BS)
+
+val_gen = tf.keras.utils.image_dataset_from_directory(data_dir, validation_split=0.2,
+                                                      subset="validation", seed=100, image_size = IS, batch_size = BS)
+
+train_gen.class_names
+
+history = model.fit(train_gen.repeat(),
+                    steps_per_epoch = 96//BS,
+                    epochs = 50,
+                    verbose = 1,
+                    validation_data = val_gen,
+                    validation_steps = 23//BS)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
