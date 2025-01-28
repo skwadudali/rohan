@@ -100,6 +100,60 @@ history = model.fit(train_gen.repeat(),
 
 
 
+from tensorflow.keras.models import load_model
+import numpy as np
+import cv2
+from picamera2 import Picamera2
+import time
+
+# Load the trained model
+model = load_model('my_model.h5')
+
+# Preprocess the image to match the model's input shape
+def preprocess_image(image, target_size=(224, 224)):
+    # Resize the image
+    image_resized = cv2.resize(image, target_size)
+ 
+    image_normalized = image_resized / 255.0
+   
+    return np.expand_dims(image_normalized, axis=0)
+
+# Initialize the PiCamera
+picam2 = Picamera2()
+
+def capture_and_predict():
+    # Configure and start the camera
+    config = picam2.create_still_configuration()
+    picam2.configure(config)
+    picam2.start()
+    time.sleep(2)  # Allow the camera to warm up
+    
+    # Capture an image
+    image = picam2.capture_array()
+    picam2.stop()
+    
+    # Preprocess the captured image
+    input_data = preprocess_image(image)
+    
+    # Make a prediction
+    predictions = model.predict(input_data)
+    
+    # Assuming you have two classes (e.g., 'trees' and 'no trees')
+    class_labels = ['trees', 'no trees']
+    predicted_class = class_labels[np.argmax(predictions)]
+    
+    print(f"Prediction: {predicted_class}")
+    
+    # Show the captured image
+    cv2.imshow("Captured Image", image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    capture_and_predict()
+
+
+
 
 
 
